@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Add your dark UI CSS styles here */
+        body {
+            background-color: #333;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        /* Center the search box */
+        .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Style the search input */
+        .search-input {
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            background-color: #555;
+            color: #fff;
+            font-size: 16px;
+            width: 400px;
+            outline: none;
+            transition: background-color 0.2s;
+        }
+
+        /* Style the search button */
+        .search-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        /* Change button color on hover */
+        .search-button:hover {
+            background-color: #0056b3;
+        }
+
+        .result-card {
+            background-color: #444;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .collapsible {
+            cursor: pointer;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .icon {
+            margin-right: 5px;
+        }
+
+        .section-header {
+            margin-bottom: 10px;
+        }
+
+        .section-body {
+            margin-left: 20px;
+        }
+
+        /* Add separator style */
+        .separator {
+            margin: 10px 0;
+            border-top: 1px solid #666;
+        }
+
+        /* Highlight search results */
+        .highlight {
+            background-color: rgb(105, 98, 214);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-container">
+            <form action="/search" method="get">
+                <input type="text" name="query" class="search-input" placeholder="Enter search query">
+                <button type="submit" class="search-button">Search</button>
+            </form>
+        </div>
+
+        {% for account in results %}
+        <div class="result-card">
+            <div class="section-header">
+                <!-- Account Details -->
+                <h2>Account Details:</h2>
+                <p>Account public key: {{ account.account_public_key }}</p>
+                <p>Account secret key: {{ account.account_secret_key }}</p>
+            </div>
+
+            <div class="section-header">
+                <!-- Latest Payments -->
+                <h2 class="collapsible">Latest Payments <i class="icon fas fa-caret-down"></i></h2>
+                <div class="section-body content">
+                    {% for payment in account.payments %}
+                    <div class="card">
+                        <div class="card">
+                            <p>Payment ID: {{ payment.id }}</p>
+                            <p>Amount: {{ payment.amount }}</p>
+                            <p>Source Asset: {{ payment.source_asset_code }}</p>
+                            <p>Source Asset Amount: {{ payment.source_asset_amount }}</p>
+                            <p>Destination Asset: {{ payment.destination_asset_code }}</p>
+                            <p>Destination Asset Amount: {{ payment.destination_asset_amount }}</p>
+                            <p>Date: {{ payment.created_at }}</p>
+                        </div>
+                        <!-- ... Your existing payment content ... -->
+                    </div>
+                    <!-- Add separator between each payment -->
+                    <div class="separator"></div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="section-header">
+                <!-- Account Balances -->
+                <h2 class="collapsible">Account Balances <i class="icon fas fa-caret-down"></i></h2>
+                <div class="section-body content">
+                    <ul>
+                        {% for balance in account.balances %}
+                        <li>Asset: {{ balance.asset | safe }}, Balance: {{ balance.balance | safe }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <!-- Claimable Balances -->
+                <h2 class="collapsible">Claimable Balances <i class="icon fas fa-caret-down"></i></h2>
+                <div class="section-body content">
+                    <ul>
+                        {% for claimable_balance in account.claimable_balances %}
+                        <li>Amount: {{ claimable_balance.amount | safe }}</li>
+                        <li>Asset Code: {{ claimable_balance.asset_code | safe }}</li>
+                        <li>Issuer: {{ claimable_balance.issuer | safe }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Load the JavaScript file -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Get the search query from the URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('query');
+
+        // Highlight search query in the search results
+        if (searchQuery) {
+            const highlight = (element, query) => {
+                const innerHTML = element.innerHTML;
+                const regex = new RegExp(query, 'gi'); // 'gi' means global and case-insensitive
+                element.innerHTML = innerHTML.replace(regex, `<span class="highlight">$&</span>`);
+            };
+
+            const elementsToHighlight = document.querySelectorAll('.result-card');
+            elementsToHighlight.forEach((element) => {
+                highlight(element, searchQuery);
+            });
+        }
+    </script>
+</body>
+</html>
+

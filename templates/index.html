@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HashDex - Account Status</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #222;
+            color: #fff;
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .header {
+            background-color: #1c1c1c;
+            color: #fff;
+            padding: 8px 10px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        textarea {
+            width: 100%; /* Adjusted width to fill the container */
+            max-width: 800px;
+            height: 300px; /* Reduced height for better proportions */
+            padding: 20px;
+            margin-bottom: 20px; /* Increased margin for separation */
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .btn-custom {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        /* Change button color on hover */
+        .btn-custom:hover {
+            background-color: #45a049;
+        }
+
+        .result-card {
+            background-color: #333;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        /* Add footer styles */
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #444;
+            color: #fff;
+            font-size: 14px;
+            border-radius: 5px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>HashDex</h1>
+        <a href="/" class="btn btn-custom ml-auto">Check Status</a>
+        <a href="/run_bot" class="btn btn-custom mr-2">Run Bot</a>
+    </div>
+
+    <div class="container">
+        <h2>Stellar Account Status</h2>
+        <p>Paste your Stellar secret keys (one per line):</p>
+        <form action="/run_code" method="post">
+            <textarea name="secret_keys"></textarea>
+            <button type="submit" class="btn btn-custom">Check Status</button>
+        </form>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        Developed by Hashar Mujahid
+    </footer>
+</body>
+</html>
