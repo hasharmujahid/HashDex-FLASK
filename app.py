@@ -1,6 +1,5 @@
 import asyncio
 import aiohttp
-import requests
 from stellar_sdk import Keypair
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify , Markup
@@ -8,15 +7,10 @@ from flask import *
 from flask import Flask, render_template, request
 from stellar_sdk import Server, Keypair, Network, TransactionBuilder, Asset
 import time
-import argparse
-import random
 from stellar_sdk import Server, Keypair, Network, TransactionBuilder, Asset
 from stellar_sdk.client.requests_client import RequestsClient
 import datetime
 import json
-import argparse
-import random
-import os
 import time
 import threading
 from bot import *
@@ -180,8 +174,8 @@ def run_bot():
             global custom_paths
             custom_paths = []  # Clear the list for each run
             for i in range(1, 6):  # Check up to 5 paths
-                path_code = request.form.get(f'path{i}_code')
-                path_issuer = request.form.get(f'path{i}_issuer')
+                path_code = request.form.get(f'path{i}_code').strip()
+                path_issuer = request.form.get(f'path{i}_issuer').strip()
                 print('loading paths')
 
                 if path_code and path_issuer:
