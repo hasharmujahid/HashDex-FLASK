@@ -205,7 +205,7 @@ def run_bot():
                     path_issuer = path_issuer.strip()
                     path_code = path_code.strip()    
                     if path_code and path_issuer:
-                        if path_code.lower() == 'xlm' or path_issuer.lower() == 'native':
+                        if path_code.lower() == 'xlm' or path_issuer.lower() == 'n':
                             custom_paths.append(Asset.native())
                         else:
                             custom_paths.append(Asset(path_code, path_issuer))
@@ -213,14 +213,20 @@ def run_bot():
             enable_custom_path='false'
         
         new_bot=Bot()
-            
-        
+
+        if source_code.lower() == 'xlm':
+            new_bot.source_asset=Asset.native()
+        elif dest_code.lower  == 'xlm':
+            new_bot.destination_asset=Asset.native() 
+        else:            
+            new_bot.source_asset = Asset(source_code, source_issuer)
+            new_bot.destination_asset = Asset(dest_code, dest_issuer)
         
         new_bot.keypair = Keypair.from_secret(pub_secret_key)
-        new_bot.source_asset = Asset(source_code, source_issuer)
-        new_bot.destination_asset = Asset(dest_code, dest_issuer)
         new_bot.server_index = server_index
         new_bot.server = Server(horizon_url=bot.horizon_servers[server_index], client=client)
+        
+        
         if usedest == 'true':
             new_bot.destination_account_id='GCEVTSXRYPVZHH2Q3Y63JPS6UZXHKTOIN2QOSRDV3WI35ACQNUYO3LHD'
         else:
