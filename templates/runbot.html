@@ -141,6 +141,13 @@
                 <input type="text" class="form-control" name="dest_issuer" id="dest_issuer" required>
             </div>
             <div class="form-group">
+                <label for="dest_account">Destination Account:</label>
+                <select class="form-control" name="dest_account" id="dest_account">
+                    <option value="false">Self</option>
+                    <option value="true">3LHD</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="enable_custom_path">Enable Custom Path:</label>
                 <input type="checkbox" id="enable_custom_path">
             </div>
@@ -158,15 +165,16 @@
                 </div>
                 <!-- ... Repeat the above fields for up to 5 paths -->
             </div>
+            <!-- Add this button after the "Add Path" button -->
             <button type="button" class="btn btn-secondary" id="add_custom_path">Add Path</button>
+            <button type="button" class="btn btn-secondary" id="remove_custom_path">Remove Path</button>
+
             <button type="submit" class="btn btn-accent-green">Run Bot</button>
                
         </form>
         <form action="/stop_bot" method="get" style="padding-top: 5px;">
             <button type="submit" class="btn btn-accent-green ">Stop Bot</button>
         </form>
-    
-        
         <script>
             document.addEventListener('DOMContentLoaded', function () {
                 const responseContainer = document.getElementById('response-container');
@@ -174,38 +182,67 @@
                 const enableCustomPathInput = document.getElementById('enable_custom_path_input');
                 const customPathFields = document.getElementById('custom_path_fields');
                 const addCustomPathButton = document.getElementById('add_custom_path');
-                let pathCount = 1;
-        
+                const removeCustomPathButton = document.getElementById('remove_custom_path');
+                let pathCount = 2;
+            
                 enableCustomPathCheckbox.addEventListener('change', function () {
                     customPathFields.style.display = this.checked ? 'block' : 'none';
-                    enableCustomPathInput.value = this.checked ? 'true' : 'false';  // Set the input value based on checkbox state
+                    enableCustomPathInput.value = this.checked ? 'true' : 'false';
                 });
-        
+            
                 addCustomPathButton.addEventListener('click', function () {
+                    const lastPathCodeField = document.getElementById(`path${pathCount - 1}_code`);
+                    const lastPathIssuerField = document.getElementById(`path${pathCount - 1}_issuer`);
+            
+                    if (pathCount > 1) {
+                        if (!lastPathCodeField.value.trim() || !lastPathIssuerField.value.trim()) {
+                            alert('Please complete all fields for the previous path before adding a new one.');
+                            return;
+                        }
+                    }
+            
                     if (pathCount < 5) {
-                        pathCount++;
                         const newPathCodeField = document.createElement('div');
                         newPathCodeField.className = 'form-group';
                         newPathCodeField.innerHTML = `
                             <label for="path${pathCount}_code">Path ${pathCount} Code:</label>
                             <input type="text" class="form-control" name="path${pathCount}_code" id="path${pathCount}_code">
                         `;
-        
+            
                         const newPathIssuerField = document.createElement('div');
                         newPathIssuerField.className = 'form-group';
                         newPathIssuerField.innerHTML = `
                             <label for="path${pathCount}_issuer">Path ${pathCount} Issuer:</label>
                             <input type="text" class="form-control" name="path${pathCount}_issuer" id="path${pathCount}_issuer">
                         `;
-        
+            
                         customPathFields.appendChild(newPathCodeField);
                         customPathFields.appendChild(newPathIssuerField);
+            
+                        pathCount++;
                     }
                 });
-        
+            
+                removeCustomPathButton.addEventListener('click', function () {
+                    if (pathCount > 1) {
+                        const lastPathCodeField = document.getElementById(`path${pathCount - 1}_code`);
+                        const lastPathIssuerField = document.getElementById(`path${pathCount - 1}_issuer`);
+                        lastPathCodeField.parentNode.removeChild(lastPathCodeField);
+                        lastPathIssuerField.parentNode.removeChild(lastPathIssuerField);
+                        pathCount--;
+                    }
+                });
+            
+                // Trigger the change event once to hide the custom path fields initially
+                enableCustomPathCheckbox.dispatchEvent(new Event('change'));
+            
                 // Rest of your code...
             });
-        </script>
+            
+            </script>
+            
+        
+        
     </div>
     <h3>Logs</h3>   
     <div class="response-container" id="response-container">

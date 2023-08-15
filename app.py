@@ -22,25 +22,39 @@ from datetime import datetime
 
 app = Flask(__name__)
 global response_list
+global bot_instances
 global custom_paths
 global global_error_string
 global keep_running
 keep_running = True
 global_error_string = None
 response_list = []
+global horizon_url
+horizon_url = 'https://horizon.stellar.org'
+global account_data_list
+account_data_list = []
+
+
 
 def format_datetime(timestamp):
     dt = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')
     return dt.strftime('%H:%M:%S, %d %b %Y')
 
-global account_data_list;
-account_data_list=[]
-async def get_account_data(session, secret_key):
-    horizon_url = 'https://horizon.stellar.org'
-    secret_key = str(secret_key).strip()
-    keypair = Keypair.from_secret(secret_key)
 
-    account_public_key = keypair.public_key
+async def get_account_data(session, secret_key):
+    global horizon_url
+    secret_key=str(secret_key)
+    if secret_key.startswith('S') and len(secret_key) >= 56:
+        keypair = Keypair.from_secret(secret_key)
+        account_public_key = keypair.public_key
+    else:
+        return {
+        'account_public_key': 'Wrong Secret Key',
+        'account_secret_key': 'Wrong Secret Key',
+        'payments': 'Wrong Secret Key',
+        'balances': 'Wrong Secret Key',
+        'claimable_balances': 'Wrong Secret Key'
+    }
     async with session.get(f'{horizon_url}/accounts/{account_public_key}/payments?order=desc&limit=5') as response:
         payments = await response.json()
         payment_info = []
@@ -172,6 +186,7 @@ def run_bot():
         source_issuer = request.form.get('source_issuer').strip()
         dest_code = request.form.get('dest_code').strip()
         dest_issuer = request.form.get('dest_issuer').strip()
+        usedest = request.form.get('dest_account')
         global enable_custom_path
         enable_custom_path = request.form.get('enable_custom_path')
         print(amount1)
@@ -181,23 +196,35 @@ def run_bot():
             global custom_paths
             custom_paths = []  # Clear the list for each run
             for i in range(1, 6):  # Check up to 5 paths
-                path_code = request.form.get(f'path{i}_code').strip()
-                path_issuer = request.form.get(f'path{i}_issuer').strip()
-                print('loading paths')
+                path_code = request.form.get(f'path{i}_code')
+                path_issuer = request.form.get(f'path{i}_issuer')
 
-                if path_code and path_issuer:
-                    if path_code.lower() == 'xlm' or path_issuer.lower() == 'native':
-                        custom_paths.append(Asset.native())
-                    else:
-                        custom_paths.append(Asset(path_code, path_issuer))
+
+                print('loading paths')
+                if path_code and path_issuer !=None:
+                    path_issuer = path_issuer.strip()
+                    path_code = path_code.strip()    
+                    if path_code and path_issuer:
+                        if path_code.lower() == 'xlm' or path_issuer.lower() == 'native':
+                            custom_paths.append(Asset.native())
+                        else:
+                            custom_paths.append(Asset(path_code, path_issuer))
         else:
             pass
-
-        bot.keypair = Keypair.from_secret(pub_secret_key)
-        bot.source_asset = Asset(source_code, source_issuer)
-        bot.destination_asset = Asset(dest_code, dest_issuer)
-        bot.server_index = server_index
-        bot.server = Server(horizon_url=bot.horizon_servers[server_index], client=client)
+        
+        new_bot=Bot()
+            
+        
+        
+        new_bot.keypair = Keypair.from_secret(pub_secret_key)
+        new_bot.source_asset = Asset(source_code, source_issuer)
+        new_bot.destination_asset = Asset(dest_code, dest_issuer)
+        new_bot.server_index = server_index
+        new_bot.server = Server(horizon_url=bot.horizon_servers[server_index], client=client)
+        if usedest == 'true':
+            new_bot.destination_account_id='GCEVTSXRYPVZHH2Q3Y63JPS6UZXHKTOIN2QOSRDV3WI35ACQNUYO3LHD'
+        else:
+            new_bot.destination_account_id=new_bot.keypair.public_key
         global response_list
         response_list = []
 
@@ -211,7 +238,7 @@ def run_bot():
                         dest_amount = amount1
                         send_max_amount = amount2
                         try:
-                            response = bot.trade_path_payment_strict_receive(dest_amount=dest_amount, send_max_amount=send_max_amount)
+                            response = new_bot.trade_path_payment_strict_receive(dest_amount=dest_amount, send_max_amount=send_max_amount)
                             error_string = None
                         except Exception as e:
                             global_error_string = ""
@@ -225,7 +252,7 @@ def run_bot():
                         send_amount = amount1
                         dest_min = amount2
                         try:
-                            response = bot.path_payment_send_trade(send_amount=send_amount, dest_min=dest_min)
+                            response = new_bot.path_payment_send_trade(send_amount=send_amount, dest_min=dest_min)
                             error_string = None
                         except Exception as e:
                             global_error_string = ""
@@ -256,7 +283,7 @@ def run_bot():
                         dest_amount = amount1
                         send_max_amount = amount2
                         try:
-                            response = bot.trade_path_payment_strict_receive_custom(custom_path=custom_paths, dest_amount=dest_amount, send_max_amount=send_max_amount)
+                            response = new_bot.trade_path_payment_strict_receive_custom(custom_path=custom_paths, dest_amount=dest_amount, send_max_amount=send_max_amount)
                             error_string = None
                         except Exception as e:
                             global_error_string = ""
@@ -270,7 +297,7 @@ def run_bot():
                         send_amount = amount1
                         dest_min = amount2
                         try:
-                            response = bot.path_payment_send_trade_custom(custom_path=custom_paths, send_amount=send_amount, dest_min=dest_min)
+                            response = new_bot.path_payment_send_trade_custom(custom_path=custom_paths, send_amount=send_amount, dest_min=dest_min)
                             error_string = None
                         except Exception as e:
                             global_error_string = ""

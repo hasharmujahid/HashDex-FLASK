@@ -25,7 +25,7 @@ class Bot():
     # ... Your existing Bot class definition ...
     def __init__(self):
         pub_secret_key = "SDWDCAW64U7JEEWTA2CMACADKLQUMC3OU4QQLOCU6FKXDB63YA2CXBVH"
-        destination_account_id = "GCEVTSXRYPVZHH2Q3Y63JPS6UZXHKTOIN2QOSRDV3WI35ACQNUYO3LHD"
+        destination_account_id = ''
         self.BASE_FEE = 10000
         from_asset = Asset('8181','GBI3UEIFLFQ4TGH53DM3BQLHXHYTGTNZYEY2CLMQU64XUH5I5EQJW6DE')
         dest_asset = Asset('AQUA', 'GBNZILSTVQZ4R7IKQDGHYGY2QXL5QOFJYQMXPKWRRM5PAV7Y4M67AQUA')
@@ -38,7 +38,7 @@ class Bot():
         self.keypair = Keypair.from_secret(pub_secret_key)
         self.destination_account_id = destination_account_id
         self.name = "Bot"
-        
+      
     def get_optimal_path_receive(self, dest_amount):
         
         paths = self.server.strict_receive_paths(
