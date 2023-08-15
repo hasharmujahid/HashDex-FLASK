@@ -210,7 +210,7 @@ def run_bot():
                         else:
                             custom_paths.append(Asset(path_code, path_issuer))
         else:
-            pass
+            enable_custom_path='false'
         
         new_bot=Bot()
             
