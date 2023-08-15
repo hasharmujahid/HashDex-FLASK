@@ -37,6 +37,7 @@ global account_data_list;
 account_data_list=[]
 async def get_account_data(session, secret_key):
     horizon_url = 'https://horizon.stellar.org'
+    secret_key = str(secret_key).strip()
     keypair = Keypair.from_secret(secret_key)
 
     account_public_key = keypair.public_key
