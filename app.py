@@ -24,9 +24,11 @@ global keep_running
 keep_running = True
 global_error_string = None
 response_list = []
+
 def format_datetime(timestamp):
     dt = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')
     return dt.strftime('%H:%M:%S, %d %b %Y')
+
 global account_data_list;
 account_data_list=[]
 async def get_account_data(session, secret_key):
@@ -309,7 +311,7 @@ def get_responses():
             result_codes = error_data.get('extras', {}).get('result_codes', {})
             operations = result_codes.get('operations', [])
             errors.extend(operations)  # Store the errors in the 'errors' list
-        except json.JSONDecodeError:
+        except json.decoder.JSONDecodeError:
             errors.append(global_error_string)
     
     combined_data = {"logs": logs_data, "errors": errors}
