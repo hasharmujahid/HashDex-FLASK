@@ -36,35 +36,51 @@ account_data_list = []
 
 
 
+horizon_url = "https://horizon.stellar.org"  # Horizon server URL
+
 def format_datetime(timestamp):
     dt = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%SZ')
     return dt.strftime('%H:%M:%S, %d %b %Y')
 
-
 async def get_account_data(session, secret_key):
     global horizon_url
-    secret_key=str(secret_key)
+    secret_key = str(secret_key)
     if secret_key.startswith('S') and len(secret_key) >= 56:
         keypair = Keypair.from_secret(secret_key)
         account_public_key = keypair.public_key
     else:
         return {
-        'account_public_key': 'Wrong Secret Key',
-        'account_secret_key': 'Wrong Secret Key',
-        'payments': 'Wrong Secret Key',
-        'balances': 'Wrong Secret Key',
-        'claimable_balances': 'Wrong Secret Key'
-    }
+            'account_public_key': 'Wrong Secret Key',
+            'account_secret_key': 'Wrong Secret Key',
+            'payments': 'Wrong Secret Key',
+            'balances': 'Wrong Secret Key',
+            'claimable_balances': 'Wrong Secret Key'
+        }
+
     async with session.get(f'{horizon_url}/accounts/{account_public_key}/payments?order=desc&limit=5') as response:
         payments = await response.json()
         payment_info = []
         embedded_records = payments.get('_embedded', {}).get('records', [])
         for payment in embedded_records:
-            destination_asset_code = payment.get('asset_code', 'N/A')
             destination_asset_amount = payment.get('amount', 'N/A')
-            source_asset_code = payment.get('source_asset_code', 'N/A')
             source_asset_amount = payment.get('source_amount', 'N/A')
             
+            destination_asset_type = payment.get('asset_type')
+            source_asset_type = payment.get('source_asset_type')
+            
+            destination_asset_code = 'N/A'  # Initialize with default value
+            source_asset_code = 'N/A'  # Initialize with default value
+            
+            if destination_asset_type == 'native':
+                destination_asset_code = 'XLM'
+            elif destination_asset_type == 'credit_alphanum4':
+                destination_asset_code = payment.get('asset_code')
+            
+            if source_asset_type == 'native':
+                source_asset_code = 'XLM'
+            elif source_asset_type == 'credit_alphanum4':
+                source_asset_code = payment.get('source_asset_code')
+
             payment_data = {
                 'id': payment.get('id', 'N/A'),
                 'amount': destination_asset_amount,
@@ -82,12 +98,21 @@ async def get_account_data(session, secret_key):
         if 'balances' in account_details:
             balances = account_details['balances']
             for balance in balances:
-                asset_code = balance.get('asset_code', 'N/A')
-                balance_data = {
-                    'asset': asset_code,
-                    'balance': balance['balance']
-                }
-                balance_info.append(balance_data)
+                asset_type = balance.get('asset_type')
+                if asset_type == 'native':
+                    asset_code = 'XLM'
+                elif asset_type == 'credit_alphanum4':
+                    asset_code = balance.get('asset_code')
+                else:
+                    asset_code = 'N/A'
+                if asset_code != 'N/A':
+                    balance_data = {
+                        'asset': asset_code,
+                        'balance': balance['balance']
+                    }
+                    balance_info.append(balance_data)
+                else:
+                    pass
         else:
             balance_info.append({'asset': 'N/A', 'balance': 'N/A'})
 
@@ -97,19 +122,14 @@ async def get_account_data(session, secret_key):
         for claimable_balance in claimable_balances['_embedded']['records']:
             asset = claimable_balance['asset']
             asset_code, issuer = asset.split(':')
+            if asset_code is None:
+                asset_code = 'XLM'
             claimable_data = {
                 'amount': claimable_balance['amount'],
                 'asset_code': asset_code,
                 'issuer': issuer
             }
             claimable_info.append(claimable_data)
-    account_data_list.append({
-        'account_public_key': keypair.public_key,
-        'account_secret_key': secret_key,
-        'payments': payment_info,
-        'balances': balance_info,
-        'claimable_balances': claimable_info
-    })    
 
     return {
         'account_public_key': keypair.public_key,
