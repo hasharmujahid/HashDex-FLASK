@@ -248,7 +248,7 @@ def run_bot():
         
         
         if usedest == 'true':
-            new_bot.destination_account_id='GCEVTSXRYPVZHH2Q3Y63JPS6UZXHKTOIN2QOSRDV3WI35ACQNUYO3LHD'
+            new_bot.destination_account_id='' # ADD DESTINATION ACCOUNT
         else:
             new_bot.destination_account_id=new_bot.keypair.public_key
         global response_list
@@ -360,7 +360,7 @@ def get_responses():
     for response in response_list:
         if response is not None:
             message = response.get('hash', '')
-            status = response.get('successful', '')  # Assuming 'status' is a field in your response
+            status = response.get('successful', '')  
             logs_data.append({'hash': message, 'successful': status})
     
     if global_error_string:
