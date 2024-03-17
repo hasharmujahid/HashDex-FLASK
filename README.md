@@ -1,0 +1,1 @@
+HASHDEX is a Personalised Dashboard for Monitoring the status of multiple Stellar Accounts. It has a functionality ti run multiple bots which can make trades on the stellar market using different statergies.  
