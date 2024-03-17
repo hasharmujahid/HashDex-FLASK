@@ -22,7 +22,7 @@ import threading
 
 client = RequestsClient(num_retries=0, post_timeout=16)
 class Bot():
-    # ... Your existing Bot class definition ...
+    # Constructor 
     def __init__(self):
         pub_secret_key = "" # ADD SECRETS
         destination_account_id = '' # DESTINATION ACCOUNT
