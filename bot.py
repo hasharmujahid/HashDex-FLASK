@@ -24,8 +24,8 @@ client = RequestsClient(num_retries=0, post_timeout=16)
 class Bot():
     # ... Your existing Bot class definition ...
     def __init__(self):
-        pub_secret_key = "SDWDCAW64U7JEEWTA2CMACADKLQUMC3OU4QQLOCU6FKXDB63YA2CXBVH"
-        destination_account_id = ''
+        pub_secret_key = "" # ADD SECRETS
+        destination_account_id = '' # DESTINATION ACCOUNT
         self.BASE_FEE = 10000
         from_asset = Asset('8181','GBI3UEIFLFQ4TGH53DM3BQLHXHYTGTNZYEY2CLMQU64XUH5I5EQJW6DE')
         dest_asset = Asset('AQUA', 'GBNZILSTVQZ4R7IKQDGHYGY2QXL5QOFJYQMXPKWRRM5PAV7Y4M67AQUA')
@@ -157,7 +157,7 @@ class Bot():
                 dest_asset=self.destination_asset,
                 dest_amount=dest_amount,
                 send_asset=self.source_asset,
-                send_max=send_max_amount,  # Use the provided send_max_amount
+                send_max=send_max_amount,  
                 path=optimal_path,
             )
             .set_timeout(80)
